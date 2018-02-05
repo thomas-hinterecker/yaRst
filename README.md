@@ -1,2 +1,2 @@
-# yarst
-Yet another stats toolbox
+# yaRst
+Yet another R stats toolbox
