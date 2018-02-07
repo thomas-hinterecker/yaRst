@@ -9,15 +9,15 @@ source("LinearRegression.R")
 
 x <- 1:100
 n <- length(x)
-set.seed(100)
-random_error <- rnorm(n)
-y <- 2*x+10+random_error
+y <- 2*x+10+rnorm(n)
 
 lr <- LinearRegression(x, y)
 summary(lr)
+logLik(lr)
 predict(lr, c(10,20,30))
 
 summary(res <- lm(y~x))
+logLik(res)
 predict(res, data.frame(x=c(10,20,30)))
 
 

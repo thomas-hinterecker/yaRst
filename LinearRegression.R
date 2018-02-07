@@ -1,18 +1,19 @@
 
 LinearRegression <- function (X, y) {
-  # estimate parameters
-  y.mean <- mean(y)
-  X.mean <- mean(X)
-  beta1 <- sum((x - X.mean)*(y-y.mean))/sum((X-X.mean)^2)
-  beta0 <- y.mean - beta1*X.mean
+  library(MASS)
+  X <- as.matrix(X)
+  m <- nrow(X)
   #
-  y.fitted <- beta1*x+beta0
-  residuals <- y.fitted-y
+  A <- cbind(matrix(1, nrow = m, ncol = 1), X[,]) 
+  pheta.ml = ginv(t(A) %*% A) %*% t(A) %*% y
   #
-  z <- list(coefficients = list(beta0, beta1), 
-            df.residual = n - 2, 
+  y.fitted <- A %*% pheta.ml
+  residuals <- y.fitted - y
+  #
+  z <- list(coefficients = pheta.ml, 
+            df.residual = n - nrow(pheta.ml), 
             fitted.values = y.fitted, 
-            residuals = residuals, X = X, y = y)
+            m = m, residuals = residuals, X = X, y = y)
   class(z) <- c("LinearRegression")
   return(z)
 }
@@ -29,12 +30,19 @@ summary.LinearRegression <- function (object) {
   return(ans)
 }
 
-predict.LinearRegression <- function (object, x) {
-  ncoef <- length(object$coefficients)
-  coef <- unlist(object$coefficients)
-  slopes <- coef[2:(ncoef)]
-  y.predict <- slopes*x+coef[1]
+predict.LinearRegression <- function (object, X) {
+  X <- as.matrix(X)
+  m <- nrow(X)
+  A <- cbind(matrix(1, nrow = m, ncol = 1), X[,]) 
+  y.predict <- A %*% object$coefficients
   return(y.predict)
 }
 
-summary.lm
+logLik.LinearRegression <- function (object) {
+  rss <- sum(object$residuals^2)
+  resvar <- rss/object$df.residual
+  sigma <- sqrt(resvar)
+  sigmaML = sigma*sqrt((object$m-nrow(object$coefficients))/object$m)
+  loglik = sum(log(dnorm(object$y,object$fitted.values,sigmaML)))
+  return(loglik)
+}
