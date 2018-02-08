@@ -19,7 +19,7 @@ predict.KNearestNeighbor <- function (object, predict) {
     distances = c()
     # Compute euclidean distances between features of test item and each train item
     for (j in 1:object$m_X) {
-      distances[j] = sqrt(sum((predict[i,] - object$X[j,])^2 ))
+      distances[j] = sqrt(sum((predict[i,] - object$X[j,])^2))
     }
     # Get number of class votes in k neighbors
     class_votes <- vector("integer", length(object$classes))
