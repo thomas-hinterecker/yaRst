@@ -1,7 +1,7 @@
 # Logistic Regression Classification
 #
 #
-LogisticRegression <- function (X, y) {
+LogisticRegression <- function (X, y, iters = 1000) {
   library(MASS)
   X <- as.matrix(X)
   m <- nrow(X)
@@ -9,10 +9,10 @@ LogisticRegression <- function (X, y) {
   n <- ncol(A)
   pheta <- matrix(0, nrow = ncol(A), ncol = 1)
   prev_pheta <- vector("numeric", length = n)
-  while (TRUE) {
-    z <- sigmoid(A%*%pheta)
+  for (i in 1:iters) {
+    z <- sigmoid(A %*% pheta)
     L <- -sum(y*log(z) + (1-y)*log(1-z))
-    dwL <- t(A)%*%(z-y)
+    dwL <- t(A) %*% (z-y)
     B <- diag(as.vector(z*(1-z)), nrow(A), nrow(A))
     pheta = pheta - ginv(t(A) %*% B %*% A) %*% dwL
     if (all(pheta == prev_pheta)) {

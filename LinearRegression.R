@@ -1,5 +1,5 @@
 
-LinearRegression <- function (X, y, lambda = 0, delta = 0, normalize = FALSE) {
+LinearRegression <- function (X, y, lambda = 0, delta = 0, normalize = FALSE, iters = 1000) {
   #library(MASS)
   X <- as.matrix(X)
   if (normalize == TRUE) {
@@ -17,8 +17,8 @@ LinearRegression <- function (X, y, lambda = 0, delta = 0, normalize = FALSE) {
   pheta <- solve(t(A) %*% A + lambda*I) %*% t(A) %*% y
   # Lasso
   if (delta != 0) {
-    prev_pheta <- vector("numeric", length = n+1)
-    while (TRUE) {
+    prev_pheta <- vector("numeric", length = n)
+    for (i in 1:iters) {
       for (j in 1:n) {
         a = 2*sum(A[,j]^2)
         c = 2*sum(A[,j]*(y - A %*% pheta + A[,j] * pheta[j]))
@@ -30,13 +30,12 @@ LinearRegression <- function (X, y, lambda = 0, delta = 0, normalize = FALSE) {
           pheta[j] <- 0
         }
       }
-      if (all(pheta == prev_pheta)) {
+      if (all(as.vector(pheta) == prev_pheta)) {
         break
       }
-      prev_pheta <- pheta
+      prev_pheta <- as.vector(pheta)
     }
   }
-  print(pheta)
   # Calculate y.hat
   y.fitted <- A %*% pheta
   # Residuals
