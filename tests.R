@@ -12,17 +12,18 @@ x1 <- seq(1, 5, by=0.1)
 n <- length(x1)
 y <- 2*x1+2+rnorm(n, sd = 10);plot(y)
 
-rbf <- function (x, mu, sigma = 1) {dnorm(x, mu, sigma)} # exp(-1/lambda*sqrt((x-mu)^2))
-plot(rbf(1:100, 50, 10))
-plot(dnorm(1:100, 50, 10))
+# rbf <- function (x, mu, sigma = 1) {dnorm(x, mu, sigma)} # exp(-1/lambda*sqrt((x-mu)^2))
+# plot(rbf(1:100, 50, 10))
+# plot(dnorm(1:100, 50, 10))
+# 
+# predictors <- NULL
+# bandwitdh <- seq(1, 5, by=0.5)
+# for (i in 1:length(bandwitdh)) {
+#   predictors <- cbind(predictors, rbf(x1, i))
+# }
 
-predictors <- NULL
-bandwitdh <- seq(1, 5, by=0.5)
-for (i in 1:length(bandwitdh)) {
-  predictors <- cbind(predictors, rbf(x1, i))
-}
-#res <- LinearRegression(cbind(x1, x1^2, x1^3, x1^4), y, lambda = 0, normalize = TRUE)
-res <- LinearRegression(predictors, y, lambda = 0, normalize = FALSE)
+predictors <- cbind(x1, x1^2, x1^3, x1^4)
+res <- LinearRegression(predictors, y, lambda = 0, delta = 2, normalize = TRUE)
 summary(res)
 logLik(res)
 #predict(res, matrix(c(10, 20, 30, 20, 5, 40), 3, 2))

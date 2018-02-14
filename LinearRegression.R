@@ -1,5 +1,5 @@
 
-LinearRegression <- function (X, y, lambda = 0, normalize = FALSE) {
+LinearRegression <- function (X, y, lambda = 0, delta = 0, normalize = FALSE) {
   #library(MASS)
   X <- as.matrix(X)
   if (normalize == TRUE) {
@@ -9,24 +9,53 @@ LinearRegression <- function (X, y, lambda = 0, normalize = FALSE) {
   m <- nrow(X)
   # Design matrix
   A <- cbind(matrix(1, nrow = m, ncol = 1), X[,]) 
+  # Number of dimensions
+  n <- ncol(A)
   # Get pheta
   I <- diag(1, ncol(A), ncol(A))
   I[1] <- 0
-  pheta.ml = solve(t(A) %*% A + lambda*I) %*% t(A) %*% y
+  pheta <- solve(t(A) %*% A + lambda*I) %*% t(A) %*% y
+  # Lasso
+  if (delta != 0) {
+    prev_pheta <- vector("numeric", length = n+1)
+    while (TRUE) {
+      for (j in 1:n) {
+        a = 2*sum(A[,j]^2)
+        c = 2*sum(A[,j]*(y - A %*% pheta + A[,j] * pheta[j]))
+        if (c < -1*delta) {
+          pheta[j] <- (c+delta)/a
+        } else if (c > delta) {
+          pheta[j] <- (c-delta)/a
+        } else {
+          pheta[j] <- 0
+        }
+      }
+      if (all(pheta == prev_pheta)) {
+        break
+      }
+      prev_pheta <- pheta
+    }
+  }
+  print(pheta)
   # Calculate y.hat
-  y.fitted <- A %*% pheta.ml
+  y.fitted <- A %*% pheta
   # Residuals
   residuals <- y - y.fitted
   # Loss
-  #rss <- sum(residuals^2)
-  rss <- t(y - A %*% pheta.ml) %*% (y - A %*% pheta.ml) + lambda*t(pheta.ml) %*% pheta.ml
+  rss <- sum(residuals^2)
+  #rss <- t(y - A %*% pheta) %*% (y - A %*% pheta) 
+  #if (regularization == "ridge") {
+  #  rss <- rss + lambda*t(pheta) %*% pheta
+  #} else if (regularization == "lasso") {
+  #  rss <- rss + lambda*sum(abs(pheta))
+  #}
   # R^2
   tss <- sum((y - mean(y))^2)
   rsquared <- 1 - rss/tss
   # Degrees of freedom of residuals
-  df.residuals <- n - nrow(pheta.ml)
+  df.residuals <- m - nrow(pheta)
   # Output
-  z <- list(coefficients = pheta.ml, 
+  z <- list(coefficients = pheta, 
             df.residuals = df.residuals, 
             fitted.values = y.fitted, 
             m = m, 
@@ -34,7 +63,7 @@ LinearRegression <- function (X, y, lambda = 0, normalize = FALSE) {
             rss = rss,
             sigma = sqrt(rss/df.residuals),
             rsquared = rsquared,
-            rsquared.corr = 1 - (1 - rsquared) * (m - 1) / (m - nrow(pheta.ml)),
+            rsquared.corr = 1 - (1 - rsquared) * (m - 1) / (m - nrow(pheta)),
             X = X, 
             y = y,
             normalized = normalize)
